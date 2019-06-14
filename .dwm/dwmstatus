@@ -1,0 +1,96 @@
+#! /bin/bash
+
+delim="║"
+
+internet()
+{
+    grep "^\s*w" /proc/net/wireless | awk '{ print "", int($3 * 100 / 70) "%" }'
+    sed "s/down//;s/up//" /sys/class/net/e*/operstate
+}
+
+mem()
+{
+    read usage <<< $(free -m | grep '^Mem' | awk '{printf "%0.0f", $3/$2*100}')
+    echo " $usage%"
+}
+
+cpu_temp()
+{
+    local suffix="°C"
+    local icon="?"
+    read temp <<< $(sensors | grep '^Package' | awk '{print int($4)}')
+    case $temp in
+        [0-9]|0[0-9]|1[0-9]|2[0-9])  icon="" ;;
+        3[0-9]|4[0-9]|5[0-9]|6[0-9]) icon="" ;;
+        *)                           icon="" ;;
+    esac
+    echo "$icon $temp$suffix"
+}
+
+battery()
+{
+    for x in /sys/class/power_supply/BAT?/capacity;
+        do
+        case "$(cat $x 2> /dev/null)" in
+            100|9[0-9])           echo "" ;;
+            8[0-9]|7[0-9]|6[0-9]) echo "" ;;
+            5[0-9]|4[0-9])        echo "" ;;
+            3[0-9]|2[0-9]|1[0-9]) echo "" ;;
+            0[0-9]|[0-9])         echo "" ;;
+            *)                    return 1 ;;
+        esac
+    done
+}
+
+thedate()
+{
+    echo "$(date +'%a %D %_I:%M %p')"
+}
+
+volume()
+{
+    local v=$(pamixer --get-volume)
+    local m=$(pamixer --get-mute)
+    [[ "$v" -gt 100 ]] && v=100 # max value
+    [[ "$m" == "true" ]] && { echo " |------"; return 1; }
+    case "$v" in
+        100)                  echo " ------|" ;;
+        9[0-9]|8[0-9])        echo " -----|-" ;;
+        7[0-9]|6[0-9])        echo " ----|--" ;;
+        5[0-9]|4[0-9])        echo " ---|---" ;;
+        3[0-9]|2[0-9])        echo " --|----" ;;
+        0[1-9]|[1-9]|1[0-9])  echo " -|-----" ;;
+        *)                    echo " |------" ;;
+    esac
+}
+
+status()
+{
+    echo ""
+    internet
+    echo "$delim"
+    cpu_temp
+    echo "$delim"
+    mem
+    echo "$delim"
+    battery && echo "$delim"
+    volume
+    echo "$delim"
+    thedate
+}
+
+update()
+{
+    xsetroot -name "$(status | tr '\n' ' ')"
+}
+
+for pid in $(pidof -x dwmstatus); do
+    if [ $pid != $$ ]; then
+        kill -9 $pid
+    fi
+done
+
+while true; do
+    update
+    sleep 0.5
+done;
