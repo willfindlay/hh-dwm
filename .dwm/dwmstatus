@@ -44,6 +44,14 @@ battery()
     done
 }
 
+backlight()
+{
+    local actual="$(cat /sys/class/backlight/*/actual*)" || return 1;
+    local max="$(cat /sys/class/backlight/*/max*)"
+    read brightness <<< "$(echo $actual $max | awk '{printf "%0.0f", $1/$2*100}')"
+    echo " $brightness%"
+}
+
 thedate()
 {
     echo "$(date +'%a %D %_I:%M %p')"
@@ -75,6 +83,7 @@ status()
     echo "$delim"
     mem
     echo "$delim"
+    backlight && echo "$delim"
     battery && echo "$delim"
     volume
     echo "$delim"
