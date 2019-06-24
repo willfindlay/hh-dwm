@@ -5,8 +5,8 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 0;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "MesloLGS Nerd Font Mono:size=14" };
-static const char dmenufont[]       = "MesloLGS Nerd Font Mono:size=14";
+static const char *fonts[]          = { "MesloLGS Nerd Font Mono:size=20" };
+static const char dmenufont[]       = "MesloLGS Nerd Font Mono:size=20";
 static const char col_gray1[]       = "#292d3e";
 static const char col_gray2[]       = "#000000"; /* border color unfocused windows */
 static const char col_gray3[]       = "#96b5b4";
@@ -49,11 +49,13 @@ static const int attachbelow = 1;    /* 1 means attach after the currently activ
 
 #include "layouts.c"
 static const Layout layouts[] = {
+    /* first entry is default */
 	/* symbol     arrange function */
-	{ "[]=",      tile },    /* first entry is default */
-	{ "><>",      NULL },    /* no layout function means floating behavior */
+	{ "[]=",      tile },                /* tiling */
+	{ "SMS",      centeredmaster },
+    { "HHH",      grid },
 	{ "[M]",      monocle },
-	{ "HHH",      grid },
+	{ "><>",      NULL },                /* no layout function means floating behavior */
 };
 
 /* key definitions */
@@ -126,8 +128,8 @@ static Key keys[] = {
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
     /* click                event mask      button          function        argument */
-    { ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-    { ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
+    { ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1} },
+    { ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1} },
     { ClkWinTitle,          0,              Button2,        zoom,           {0} },
     { ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
     { ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },

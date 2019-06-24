@@ -10,7 +10,7 @@ setxkbmap -option caps:none &
 feh --bg-fill ~/.wallpaper &
 
 # compositor
-compton -b --backend glx --vsync opengl-swc &
+#compton -b --backend glx --vsync opengl-swc &
 
 # redshift
 redshift -l 45.3277070:-75.7878600 &
